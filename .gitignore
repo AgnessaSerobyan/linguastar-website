@@ -1,0 +1,51 @@
+# Dependencies
+/node_modules/
+
+# Build and generated preview output
+/.preview-build/
+/dist/
+/build/
+/.next/
+/out/
+
+# Tool caches and test output
+/.vite/
+/.cache/
+/.turbo/
+/coverage/
+/.nyc_output/
+/tmp/
+/temp/
+
+# Local environment and secrets
+.env
+.env.*
+.npmrc
+.netrc
+.secrets
+.secrets.*
+*.pem
+*.key
+*.p8
+*.p12
+*.pfx
+
+# Logs and local editor/OS files
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Generated, project-root design review captures (not public assets)
+/editorial-*.png
+/implementation-*.png
+/section-04-*.png
+/qa-comparison*.png
+
+# Local QA report and one-off preview/review helpers
+/design-qa.md
+/scripts/build-preview.mjs
+/scripts/make-section04-qa-board.py
