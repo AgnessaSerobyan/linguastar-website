@@ -55,12 +55,18 @@ const phoneScreens = {
   tutor: asset("phone-ai-tutor.webp"),
 };
 
+const audioClips = {
+  travel: asset("conversation-travel.wav"),
+  cafe: asset("conversation-cafe.wav"),
+  practico: asset("pronunciation-practico.wav"),
+};
+
 const tutors = [
-  { name: "Leo", language: "English", personality: "Encouraging & clear", x: "8%", y: "43%" },
-  { name: "Yuna", language: "Korean", personality: "Patient & thoughtful", x: "25%", y: "52%" },
+  { name: "Leo", language: "English", personality: "Encouraging & clear", x: "32%", y: "43%" },
+  { name: "Yuna", language: "Korean", personality: "Patient & thoughtful", x: "22%", y: "52%" },
   { name: "Sofia", language: "Spanish", personality: "Playful, lively, warm", x: "50%", y: "40%" },
-  { name: "Maya", language: "French", personality: "Curious & expressive", x: "69%", y: "48%" },
-  { name: "Hana", language: "Japanese", personality: "Calm & precise", x: "84%", y: "55%" },
+  { name: "Maya", language: "French", personality: "Curious & expressive", x: "68%", y: "48%" },
+  { name: "Hana", language: "Japanese", personality: "Calm & precise", x: "79%", y: "55%" },
 ];
 
 function ActionButton({ className = "", children, magnetic = false, ...props }) {
@@ -177,8 +183,22 @@ function AdaptiveTutorField({ mobile = false }) {
 
 function App() {
   const heroRef = useRef(null);
+  const audioRef = useRef(null);
   const [activeStory, setActiveStory] = useState("conversation");
   const [selectedTutor, setSelectedTutor] = useState(2);
+  const [speakingKey, setSpeakingKey] = useState(null);
+
+  useEffect(() => () => audioRef.current?.pause(), []);
+
+  const speak = (key) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.pause();
+    audio.currentTime = 0;
+    audio.src = audioClips[key];
+    setSpeakingKey(key);
+    audio.play().catch(() => setSpeakingKey(null));
+  };
 
   useEffect(() => {
     const markers = [...document.querySelectorAll("[data-story-marker]")];
@@ -282,6 +302,7 @@ function App() {
   return (
     <main className="site-shell">
       <div className="scroll-progress" aria-hidden="true" />
+      <audio ref={audioRef} preload="none" hidden aria-hidden="true" onEnded={() => setSpeakingKey(null)} onError={() => setSpeakingKey(null)} />
 
       <header className="site-header">
         <a href="#top" className="brand" aria-label="LinguaStar home">
@@ -366,8 +387,8 @@ function App() {
               <h2>Real-Life<br />Conversations</h2>
               <p>Practice speaking freely, ask anything, and improve at your own pace.</p>
             </div>
-            <div className="dialogue dialogue-left"><small>Travel plans</small>¿Qué planes tienes para el fin de semana?</div>
-            <div className="dialogue dialogue-right"><small>At a café</small>Me gustaría un café con leche, por favor.</div>
+            <button className={`dialogue dialogue-left sound-trigger ${speakingKey === "travel" ? "is-playing" : ""}`} type="button" onClick={() => speak("travel")} disabled={activeStory !== "conversation"} aria-label="Hear the travel plans phrase in Spanish"><small>Travel plans <SpeakerHigh weight="duotone" /></small>¿Qué planes tienes para el fin de semana?</button>
+            <button className={`dialogue dialogue-right sound-trigger ${speakingKey === "cafe" ? "is-playing" : ""}`} type="button" onClick={() => speak("cafe")} disabled={activeStory !== "conversation"} aria-label="Hear the café phrase in Spanish"><small>At a café <SpeakerHigh weight="duotone" /></small>Me gustaría un café con leche, por favor.</button>
           </div>
 
           <div className="story-scene story-scene-pronunciation" aria-hidden={activeStory !== "pronunciation"}>
@@ -378,7 +399,7 @@ function App() {
             </div>
             <div className="pronunciation-word" aria-hidden="true">CONFIDENTLY</div>
             <div className="pronunciation-score"><strong>90%</strong><span>Great clarity</span></div>
-            <div className="sound-tip"><SpeakerHigh weight="duotone" /><span>Practico</span><small>/pɾakˈtiko/</small></div>
+            <button className={`sound-tip sound-trigger ${speakingKey === "practico" ? "is-playing" : ""}`} type="button" onClick={() => speak("practico")} disabled={activeStory !== "pronunciation"} aria-label="Hear Practico pronounced in Spanish"><SpeakerHigh weight="duotone" /><span>Practico</span><small>/pɾakˈtiko/</small></button>
           </div>
 
           <div className="story-scene story-scene-progress" aria-hidden={activeStory !== "progress"}>
