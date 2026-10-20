@@ -7,6 +7,8 @@ import {
   Check,
   DownloadSimple,
   Microphone,
+  Pause,
+  Play,
   Sparkle,
   SpeakerHigh,
   Star,
@@ -60,6 +62,18 @@ const audioClips = {
   cafe: asset("conversation-cafe.wav"),
   practico: asset("pronunciation-practico.wav"),
 };
+
+const appStoreUrl = "https://apps.apple.com/am/app/linguastar-ai-learn-languages/id6746935816";
+
+const languages = [
+  { name: "American English", native: "English", flag: "🇺🇸", word: "HELLO", phrase: "Hello, how are you?", pronunciation: "A fresh start sounds good." },
+  { name: "British English", native: "English", flag: "🇬🇧", word: "HELLO", phrase: "Lovely to meet you!", pronunciation: "Make yourself at home." },
+  { name: "German", native: "Deutsch", flag: "🇩🇪", word: "HALLO", phrase: "Hallo, wie geht’s?", pronunciation: "Hello, how are you?" },
+  { name: "Spanish", native: "Español", flag: "🇪🇸", word: "HOLA", phrase: "¡Hola! ¿Qué tal?", pronunciation: "Hi! How’s it going?" },
+  { name: "French", native: "Français", flag: "🇫🇷", word: "BONJOUR", phrase: "Bonjour, enchanté !", pronunciation: "Hello, nice to meet you!" },
+  { name: "Korean", native: "한국어", flag: "🇰🇷", word: "안녕", phrase: "안녕하세요!", pronunciation: "Hello!" },
+  { name: "Japanese", native: "日本語", flag: "🇯🇵", word: "こんにちは", phrase: "こんにちは！", pronunciation: "Hello!" },
+];
 
 const tutors = [
   { name: "Leo", language: "English", personality: "Encouraging & clear", x: "32%", y: "43%" },
@@ -187,6 +201,11 @@ function App() {
   const [activeStory, setActiveStory] = useState("conversation");
   const [selectedTutor, setSelectedTutor] = useState(2);
   const [speakingKey, setSpeakingKey] = useState(null);
+  const [selectedLanguage, setSelectedLanguage] = useState(3);
+  const [headerScrolled, setHeaderScrolled] = useState(false);
+  const [languagesVisible, setLanguagesVisible] = useState(false);
+  const [languagesInView, setLanguagesInView] = useState(false);
+  const [languageAutoPlay, setLanguageAutoPlay] = useState(true);
 
   useEffect(() => () => audioRef.current?.pause(), []);
 
@@ -222,16 +241,17 @@ function App() {
       frame = 0;
       const max = document.documentElement.scrollHeight - window.innerHeight;
       document.documentElement.style.setProperty("--page-progress", max > 0 ? window.scrollY / max : 0);
+      setHeaderScrolled(window.scrollY > 24);
 
       const hero = heroRef.current;
       if (hero) {
         const rect = hero.getBoundingClientRect();
         const progress = clamp(-rect.top / Math.max(rect.height - window.innerHeight, 1));
-        hero.style.setProperty("--hero-copy-y", `${progress * -118}px`);
-        hero.style.setProperty("--hero-phone-y", `${progress * 230}px`);
-        hero.style.setProperty("--hero-phone-turn", `${-6 + progress * 13}deg`);
-        hero.style.setProperty("--hero-object-drift", `${progress * -86}px`);
-        hero.style.setProperty("--hero-fade", `${1 - clamp(progress * 1.45)}`);
+        const phoneExit = clamp((progress - 0.03) / 0.7);
+        hero.style.setProperty("--hero-phone-y", `${phoneExit * 230}px`);
+        hero.style.setProperty("--hero-phone-turn", `${-6 + phoneExit * 13}deg`);
+        hero.style.setProperty("--hero-phone-fade", `${1 - phoneExit}`);
+        hero.style.setProperty("--hero-cue-fade", `${1 - clamp(progress * 5)}`);
       }
 
       const featureSection = document.querySelector(".feature-transition");
@@ -278,9 +298,26 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+    const section = document.querySelector(".languages-section");
+    if (!section) return undefined;
+    const observer = new IntersectionObserver(([entry]) => {
+      setLanguagesInView(entry.isIntersecting);
+      if (entry.isIntersecting) setLanguagesVisible(true);
+    }, { threshold: 0.18 });
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!languagesInView || !languageAutoPlay || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
+    const timer = window.setTimeout(() => setSelectedLanguage((index) => (index + 1) % languages.length), 3700);
+    return () => window.clearTimeout(timer);
+  }, [languagesInView, languageAutoPlay, selectedLanguage]);
+
   const handleHeroPointer = (event) => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const box = heroRef.current.getBoundingClientRect();
+    const box = event.currentTarget.getBoundingClientRect();
     const x = (event.clientX - box.left) / box.width - 0.5;
     const y = (event.clientY - box.top) / box.height - 0.5;
     heroRef.current.style.setProperty("--pointer-x", x.toFixed(3));
@@ -304,16 +341,17 @@ function App() {
       <div className="scroll-progress" aria-hidden="true" />
       <audio ref={audioRef} preload="none" hidden aria-hidden="true" onEnded={() => setSpeakingKey(null)} onError={() => setSpeakingKey(null)} />
 
-      <header className="site-header">
+      <header className={`site-header ${headerScrolled ? "is-scrolled" : ""}`}>
         <a href="#top" className="brand" aria-label="LinguaStar home">
           <img src={asset("linguastar-logo.webp")} alt="LinguaStar" />
         </a>
         <nav aria-label="Primary navigation">
           <a href="#experience">Experience</a>
           <a href="#tutors">Tutors</a>
+          <a href="#languages">Languages</a>
         </nav>
-        <ActionButton className="header-download" href="https://linguastar.ai/2/" target="_blank" rel="noreferrer">
-          <DownloadSimple weight="bold" aria-hidden="true" /> Download
+        <ActionButton className="header-download" href={appStoreUrl} target="_blank" rel="noreferrer">
+          <DownloadSimple weight="bold" aria-hidden="true" /> Download from App Store
         </ActionButton>
       </header>
 
@@ -321,9 +359,8 @@ function App() {
         className="hero"
         id="top"
         ref={heroRef}
-        onPointerMove={handleHeroPointer}
-        onPointerLeave={resetHeroPointer}
       >
+        <div className="hero-pin" onPointerMove={handleHeroPointer} onPointerLeave={resetHeroPointer}>
         <div className="hero-copy">
           <p className="kicker"><Sparkle weight="fill" /> Your language learning partner</p>
           <h1>
@@ -353,10 +390,12 @@ function App() {
         </div>
         <img className="hero-star hero-star-one" src={asset("star-spark.webp")} alt="" />
         <img className="hero-star hero-star-two" src={asset("star-spark.webp")} alt="" />
+        <div className="hero-scroll-cue" aria-hidden="true"><span />Scroll to reveal</div>
+        </div>
 
         <div className="hero-actions">
-          <ActionButton magnetic href="https://linguastar.ai/2/" target="_blank" rel="noreferrer">
-            <DownloadSimple weight="bold" aria-hidden="true" /> Download LinguaStar
+          <ActionButton magnetic href={appStoreUrl} target="_blank" rel="noreferrer">
+            <DownloadSimple weight="bold" aria-hidden="true" /> Download from App Store
           </ActionButton>
           <button className="watch-story" type="button" onClick={() => goToStory("conversation")}>
             <span><ArrowDown weight="bold" /></span> See how it works
@@ -482,13 +521,64 @@ function App() {
         </div>
       </section>
 
+      <section className={`languages-section ${languagesVisible ? "is-visible" : ""}`} id="languages" aria-labelledby="languages-title">
+        <div className="languages-orbit" aria-hidden="true" />
+        <div className="languages-hero-word" key={`word-${selectedLanguage}`} aria-hidden="true">{languages[selectedLanguage].word}</div>
+        <div className="languages-heading">
+          <p className="kicker"><Sparkle weight="fill" /> A world of possibilities</p>
+          <h2 id="languages-title">Your next<br /><em>conversation</em><br />starts here.</h2>
+          <p>Choose a language. Find your voice.</p>
+        </div>
+        <div className="languages-stage">
+          <span className="languages-stage-star" aria-hidden="true">✦</span>
+          <div className="languages-display" aria-live={languageAutoPlay ? "off" : "polite"}>
+            <span className="languages-display-sweep" key={`sweep-${selectedLanguage}`} aria-hidden="true" />
+            <div className="languages-display-top">
+              <span className="languages-display-label">Speak in {languages[selectedLanguage].name}</span>
+              <span className="languages-display-count">{String(selectedLanguage + 1).padStart(2, "0")} / 07</span>
+            </div>
+            <div className="languages-display-phrase" key={`phrase-${selectedLanguage}`}>
+              <span className="languages-display-flag" aria-hidden="true">{languages[selectedLanguage].flag}</span>
+              <strong>{languages[selectedLanguage].phrase}</strong>
+              <small>{languages[selectedLanguage].pronunciation}</small>
+            </div>
+            <div className="languages-display-bottom"><Sparkle weight="fill" aria-hidden="true" /> Every conversation starts somewhere.</div>
+          </div>
+          <div className="languages-playback">
+            <span>01 — 07 · Pick your next voice</span>
+            <button type="button" onClick={() => setLanguageAutoPlay((playing) => !playing)} aria-label={languageAutoPlay ? "Pause language preview" : "Play language preview"}>
+              {languageAutoPlay ? <Pause weight="fill" aria-hidden="true" /> : <Play weight="fill" aria-hidden="true" />}
+              {languageAutoPlay ? "Pause" : "Play"}
+            </button>
+          </div>
+          <div className={`languages-timer ${languageAutoPlay && languagesInView ? "is-running" : ""}`} key={`timer-${selectedLanguage}`} aria-hidden="true"><span /></div>
+        </div>
+        <div className="language-list" aria-label="Languages you can learn">
+          {languages.map((language, index) => (
+            <button
+              key={language.name}
+              type="button"
+              className={`language-pill ${selectedLanguage === index ? "is-active" : ""}`}
+              style={{ "--language-index": index }}
+              onClick={() => { setSelectedLanguage(index); setLanguageAutoPlay(false); }}
+              aria-pressed={selectedLanguage === index}
+            >
+              <span aria-hidden="true">{language.flag}</span>
+              <span>{language.name}</span>
+              <small>{language.native}</small>
+            </button>
+          ))}
+        </div>
+        <span className="languages-watermark" aria-hidden="true">LANGUAGES</span>
+      </section>
+
       <section className="final-cta" aria-labelledby="cta-heading">
         <img src={asset("app-icon.webp")} alt="" className="cta-icon" />
         <p className="kicker">Stop memorizing. Start speaking.</p>
         <h2 id="cta-heading">Start speaking<br />confidently.</h2>
         <p>Every conversation brings you closer to fluency.</p>
-        <ActionButton magnetic href="https://linguastar.ai/2/" target="_blank" rel="noreferrer">
-          <DownloadSimple weight="bold" aria-hidden="true" /> Download LinguaStar
+        <ActionButton magnetic href={appStoreUrl} target="_blank" rel="noreferrer">
+          <DownloadSimple weight="bold" aria-hidden="true" /> Download from App Store
         </ActionButton>
       </section>
 
@@ -496,8 +586,8 @@ function App() {
         <img src={asset("linguastar-logo.webp")} alt="LinguaStar" />
         <p>Discover a new way to master speaking confidently.</p>
         <div>
-          <a href="https://linguastar.ai/privacypolicy/" target="_blank" rel="noreferrer">Privacy</a>
-          <a href="https://linguastar.ai/termsandconditions/" target="_blank" rel="noreferrer">Terms</a>
+          <a href={`${import.meta.env.BASE_URL}privacy-policy.html`}>Privacy Policy</a>
+          <a href={`${import.meta.env.BASE_URL}terms-and-conditions.html`}>Terms &amp; Conditions</a>
         </div>
       </footer>
     </main>
