@@ -7,6 +7,7 @@ import {
   Check,
   DownloadSimple,
   Microphone,
+  List,
   Pause,
   Play,
   Sparkle,
@@ -14,6 +15,7 @@ import {
   Star,
   TrendUp,
   Waveform,
+  X,
 } from "@phosphor-icons/react";
 import "@fontsource-variable/manrope";
 
@@ -64,6 +66,14 @@ const audioClips = {
 };
 
 const appStoreUrl = "https://apps.apple.com/am/app/linguastar-ai-learn-languages/id6746935816";
+const downloadPageUrl = `${import.meta.env.BASE_URL}download.html`;
+
+const storyNotes = {
+  conversation: ["Bring up a real moment.", "Try the words your way.", "Keep talking without pressure."],
+  pronunciation: ["Hear the difference.", "See where a sound slips.", "Try again with clear feedback."],
+  progress: ["Small wins add up.", "See what you have mastered.", "Know exactly what comes next."],
+  tutor: ["A partner who listens.", "Answers at your level.", "Ready whenever you are."],
+};
 
 const languages = [
   { name: "American English", native: "English", flag: "🇺🇸", word: "HELLO", phrase: "Hello, how are you?", pronunciation: "A fresh start sounds good." },
@@ -198,16 +208,38 @@ function AdaptiveTutorField({ mobile = false }) {
 function App() {
   const heroRef = useRef(null);
   const audioRef = useRef(null);
+  const menuButtonRef = useRef(null);
   const [activeStory, setActiveStory] = useState("conversation");
   const [selectedTutor, setSelectedTutor] = useState(2);
   const [speakingKey, setSpeakingKey] = useState(null);
   const [selectedLanguage, setSelectedLanguage] = useState(3);
   const [headerScrolled, setHeaderScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [languagesVisible, setLanguagesVisible] = useState(false);
   const [languagesInView, setLanguagesInView] = useState(false);
-  const [languageAutoPlay, setLanguageAutoPlay] = useState(true);
+  const [languageAutoPlay, setLanguageAutoPlay] = useState(() => !window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  const [desktopDownload, setDesktopDownload] = useState(() => window.matchMedia("(min-width: 981px) and (pointer: fine)").matches);
 
   useEffect(() => () => audioRef.current?.pause(), []);
+
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+        menuButtonRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [menuOpen]);
+
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 981px) and (pointer: fine)");
+    const updateDownloadTarget = () => setDesktopDownload(media.matches);
+    media.addEventListener("change", updateDownloadTarget);
+    return () => media.removeEventListener("change", updateDownloadTarget);
+  }, []);
 
   const speak = (key) => {
     const audio = audioRef.current;
@@ -240,7 +272,7 @@ function App() {
     const updateScrollArt = () => {
       frame = 0;
       const max = document.documentElement.scrollHeight - window.innerHeight;
-      document.documentElement.style.setProperty("--page-progress", max > 0 ? window.scrollY / max : 0);
+      document.documentElement.style.setProperty("--page-progress", max > 0 ? clamp(window.scrollY / max) : 0);
       setHeaderScrolled(window.scrollY > 24);
 
       const hero = heroRef.current;
@@ -261,13 +293,15 @@ function App() {
         featureSection.style.setProperty("--feature-title-x", `${progress * -9}vw`);
         featureSection.style.setProperty("--feature-title-y", `${progress * -12}vh`);
         const paths = [
-          [-59, -28, -3],
-          [-42, -16, -1],
-          [-25, -3, 2],
-          [-8, 11, 4],
+          [-59, -30, -3],
+          [-42, -25, -1],
+          [-25, -20, 2],
+          [-8, -15, 4],
         ];
+        const tablet = window.matchMedia("(min-width: 681px) and (max-width: 980px)").matches;
+        const tabletPaths = [[-67, -32, 6], [-23, -30, 7], [-63, -2, -7], [-19, 0, -6]];
         featureSection.querySelectorAll(".feature-card").forEach((card, index) => {
-          const [x, y, turn] = paths[index];
+          const [x, y, turn] = (tablet ? tabletPaths : paths)[index];
           card.style.setProperty("--card-x", `${progress * x}vw`);
           card.style.setProperty("--card-y", `${progress * y}vh`);
           card.style.setProperty("--card-turn", `${progress * turn}deg`);
@@ -330,28 +364,40 @@ function App() {
   };
 
   const goToStory = (id) => {
-    document.querySelector(`[data-story-marker="${id}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const mobile = window.matchMedia("(max-width: 680px)").matches;
+    document.querySelector(`[data-story-marker="${id}"]`)?.scrollIntoView({ behavior: reduceMotion ? "instant" : "smooth", block: mobile ? "start" : "center" });
   };
 
   const tutor = tutors[selectedTutor];
+  // Center the selected face when the 16:7 cast is cropped into a 3:4 mobile frame.
+  const tutorImageRatio = 16 / 7;
+  const tutorFrameRatio = 3 / 4;
+  const tutorCropX = ((Number.parseFloat(tutor.x) / 100) * tutorImageRatio - tutorFrameRatio / 2) / (tutorImageRatio - tutorFrameRatio) * 100;
   const activeStoryNumber = String(features.findIndex((feature) => feature.id === activeStory) + 1).padStart(2, "0");
+  const downloadProps = desktopDownload
+    ? { href: downloadPageUrl }
+    : { href: appStoreUrl, target: "_blank", rel: "noreferrer" };
 
   return (
     <main className="site-shell">
       <div className="scroll-progress" aria-hidden="true" />
       <audio ref={audioRef} preload="none" hidden aria-hidden="true" onEnded={() => setSpeakingKey(null)} onError={() => setSpeakingKey(null)} />
 
-      <header className={`site-header ${headerScrolled ? "is-scrolled" : ""}`}>
-        <a href="#top" className="brand" aria-label="LinguaStar home">
+      <header className={`site-header ${headerScrolled ? "is-scrolled" : ""} ${menuOpen ? "is-menu-open" : ""}`}>
+        <a href="#top" className="brand" aria-label="LinguaStar home" onClick={() => setMenuOpen(false)}>
           <img src={asset("linguastar-logo.webp")} alt="LinguaStar" />
         </a>
-        <nav aria-label="Primary navigation">
+        <button ref={menuButtonRef} type="button" className="menu-toggle" aria-label={menuOpen ? "Close navigation" : "Open navigation"} aria-expanded={menuOpen} aria-controls="primary-navigation" onClick={() => setMenuOpen((open) => !open)}>
+          {menuOpen ? <X weight="bold" aria-hidden="true" /> : <List weight="bold" aria-hidden="true" />}
+        </button>
+        <nav id="primary-navigation" aria-label="Primary navigation" onClick={() => setMenuOpen(false)}>
           <a href="#experience">Experience</a>
           <a href="#tutors">Tutors</a>
           <a href="#languages">Languages</a>
         </nav>
-        <ActionButton className="header-download" href={appStoreUrl} target="_blank" rel="noreferrer">
-          <DownloadSimple weight="bold" aria-hidden="true" /> Download from App Store
+        <ActionButton className="header-download" aria-label="Download from App Store" {...downloadProps}>
+          <DownloadSimple weight="bold" aria-hidden="true" /><span className="download-label-full">Download from App Store</span><span className="download-label-short">App Store</span>
         </ActionButton>
       </header>
 
@@ -373,7 +419,7 @@ function App() {
 
         <div className="hero-editorial-rail" aria-hidden="true">
           <span>LinguaStar · Speaking practice reimagined</span>
-          <strong>01 / 05</strong>
+          <strong>01 / 06</strong>
         </div>
 
         <img className="hero-phone" src={asset("phone-ai-tutor.webp")} alt="LinguaStar AI conversation on a phone" />
@@ -394,7 +440,7 @@ function App() {
         </div>
 
         <div className="hero-actions">
-          <ActionButton magnetic href={appStoreUrl} target="_blank" rel="noreferrer">
+          <ActionButton magnetic {...downloadProps}>
             <DownloadSimple weight="bold" aria-hidden="true" /> Download from App Store
           </ActionButton>
           <button className="watch-story" type="button" onClick={() => goToStory("conversation")}>
@@ -410,7 +456,7 @@ function App() {
             <h2 id="feature-title"><span>One learning</span><span>journey.</span><span>Four moments.</span></h2>
           </div>
           <div className="feature-counter" aria-hidden="true"><span>01</span><i /><span>04</span></div>
-          <div className="feature-deck">
+          <div className="feature-deck" role="group" aria-label="Explore the four LinguaStar features">
             {features.map((feature, index) => (
               <FeatureCard feature={feature} index={index} key={feature.id} onSelect={goToStory} />
             ))}
@@ -463,7 +509,11 @@ function App() {
           </div>
 
           <StoryPhone active={activeStory} />
-          <div className="story-running-index" aria-hidden="true">
+          <div className={`story-mini-note story-mini-note-${activeStory}`} key={`note-${activeStory}`}>
+            <span>Inside the app / {activeStoryNumber}</span>
+            <p>{storyNotes[activeStory].map((line) => <span key={line}>{line}</span>)}</p>
+          </div>
+          <div className="story-running-index" key={`index-${activeStory}`} aria-hidden="true">
             <strong>{activeStoryNumber}</strong><span>/ 04</span>
           </div>
           <div className="story-state-indicator" aria-label={`Showing ${features.find((item) => item.id === activeStory)?.title}`}>
@@ -474,13 +524,23 @@ function App() {
                 className={activeStory === feature.id ? "is-active" : ""}
                 onClick={() => goToStory(feature.id)}
                 aria-label={`Go to ${feature.title}`}
+                aria-current={activeStory === feature.id ? "step" : undefined}
               />
             ))}
           </div>
         </div>
 
         {features.map((feature) => (
-          <div className="story-marker" data-story-marker={feature.id} key={feature.id} aria-hidden="true">
+          <div className="story-marker" data-story-marker={feature.id} key={feature.id}>
+            <div className="story-mobile-heading">
+              <span>{feature.eyebrow}</span>
+              <h2>{feature.id === "tutor" ? "An AI Tutor that gets you" : feature.title}</h2>
+            </div>
+            <img className="story-mobile-phone" src={phoneScreens[feature.id]} alt={`${feature.title} screen in LinguaStar`} loading="lazy" />
+            <div className="story-marker-note">
+              <span>Inside the app / {feature.eyebrow}</span>
+              <p>{storyNotes[feature.id].map((line) => <span key={line}>{line}</span>)}</p>
+            </div>
             {feature.id === "tutor" && <AdaptiveTutorField mobile />}
           </div>
         ))}
@@ -490,10 +550,10 @@ function App() {
         <div className="avatar-heading">
           <p className="kicker">Choose your connection</p>
           <h2 id="tutor-heading">Meet a tutor who<br />speaks your language.</h2>
-          <p>Hover or tap a tutor to meet them.</p>
+          <p><span className="tutor-instructions-desktop">Hover or tap a tutor to meet them.</span><span className="tutor-instructions-mobile">Choose a tutor below to meet them.</span></p>
         </div>
-        <div className="avatar-stage">
-          <img src={asset("tutor-parade.png")} alt="A diverse group of friendly LinguaStar AI tutors" />
+        <div className="avatar-stage" style={{ "--selected-tutor-x": `${Math.max(0, Math.min(100, tutorCropX))}%` }}>
+          <img src={asset("tutor-parade.png")} alt="A diverse group of friendly LinguaStar AI tutors" loading="lazy" decoding="async" />
           {tutors.map((item, index) => (
             <button
               key={item.name}
@@ -504,6 +564,7 @@ function App() {
               onFocus={() => setSelectedTutor(index)}
               onClick={() => setSelectedTutor(index)}
               aria-label={`Meet ${item.name}, ${item.language} tutor`}
+              aria-pressed={selectedTutor === index}
             />
           ))}
           <div className="tutor-profile" key={tutor.name}>
@@ -515,6 +576,13 @@ function App() {
             <p>“Hi! I’m {tutor.name}. Ready to practice?”</p>
             <small>{tutor.personality}</small>
           </div>
+        </div>
+        <div className="tutor-selector" role="group" aria-label="Choose a tutor">
+          {tutors.map((item, index) => (
+            <button type="button" key={item.name} aria-pressed={selectedTutor === index} onClick={() => setSelectedTutor(index)}>
+              {item.name}<small>{item.language}</small>
+            </button>
+          ))}
         </div>
         <div className="tutor-marquee" aria-hidden="true">
           LEO · YUNA · SOFIA · MAYA · HANA · LEO · YUNA · SOFIA · MAYA · HANA
@@ -562,6 +630,7 @@ function App() {
               style={{ "--language-index": index }}
               onClick={() => { setSelectedLanguage(index); setLanguageAutoPlay(false); }}
               aria-pressed={selectedLanguage === index}
+              aria-label={`Preview ${language.name}`}
             >
               <span aria-hidden="true">{language.flag}</span>
               <span>{language.name}</span>
@@ -577,7 +646,7 @@ function App() {
         <p className="kicker">Stop memorizing. Start speaking.</p>
         <h2 id="cta-heading">Start speaking<br />confidently.</h2>
         <p>Every conversation brings you closer to fluency.</p>
-        <ActionButton magnetic href={appStoreUrl} target="_blank" rel="noreferrer">
+        <ActionButton magnetic {...downloadProps}>
           <DownloadSimple weight="bold" aria-hidden="true" /> Download from App Store
         </ActionButton>
       </section>
