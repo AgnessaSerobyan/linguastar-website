@@ -76,13 +76,13 @@ const storyNotes = {
 };
 
 const languages = [
-  { name: "American English", native: "English", flag: "🇺🇸", word: "HELLO", phrase: "Hello, how are you?", pronunciation: "A fresh start sounds good." },
-  { name: "British English", native: "English", flag: "🇬🇧", word: "HELLO", phrase: "Lovely to meet you!", pronunciation: "Make yourself at home." },
-  { name: "German", native: "Deutsch", flag: "🇩🇪", word: "HALLO", phrase: "Hallo, wie geht’s?", pronunciation: "Hello, how are you?" },
-  { name: "Spanish", native: "Español", flag: "🇪🇸", word: "HOLA", phrase: "¡Hola! ¿Qué tal?", pronunciation: "Hi! How’s it going?" },
-  { name: "French", native: "Français", flag: "🇫🇷", word: "BONJOUR", phrase: "Bonjour, enchanté !", pronunciation: "Hello, nice to meet you!" },
-  { name: "Korean", native: "한국어", flag: "🇰🇷", word: "안녕", phrase: "안녕하세요!", pronunciation: "Hello!" },
-  { name: "Japanese", native: "日本語", flag: "🇯🇵", word: "こんにちは", phrase: "こんにちは！", pronunciation: "Hello!" },
+  { name: "American English", lang: "en-US", native: "English", flag: "🇺🇸", word: "HELLO", phrase: "Hello, how are you?", pronunciation: "A fresh start sounds good." },
+  { name: "British English", lang: "en-GB", native: "English", flag: "🇬🇧", word: "HELLO", phrase: "Lovely to meet you!", pronunciation: "Make yourself at home." },
+  { name: "German", lang: "de", native: "Deutsch", flag: "🇩🇪", word: "HALLO", phrase: "Hallo, wie geht’s?", pronunciation: "Hello, how are you?" },
+  { name: "Spanish", lang: "es", native: "Español", flag: "🇪🇸", word: "HOLA", phrase: "¡Hola! ¿Qué tal?", pronunciation: "Hi! How’s it going?" },
+  { name: "French", lang: "fr", native: "Français", flag: "🇫🇷", word: "BONJOUR", phrase: "Bonjour, enchanté !", pronunciation: "Hello, nice to meet you!" },
+  { name: "Korean", lang: "ko", native: "한국어", flag: "🇰🇷", word: "안녕", phrase: "안녕하세요!", pronunciation: "Hello!" },
+  { name: "Japanese", lang: "ja", native: "日本語", flag: "🇯🇵", word: "こんにちは", phrase: "こんにちは！", pronunciation: "Hello!" },
 ];
 
 const tutors = [
@@ -208,6 +208,7 @@ function AdaptiveTutorField({ mobile = false }) {
 function App() {
   const heroRef = useRef(null);
   const audioRef = useRef(null);
+  const playbackRequestRef = useRef(0);
   const menuButtonRef = useRef(null);
   const [activeStory, setActiveStory] = useState("conversation");
   const [selectedTutor, setSelectedTutor] = useState(2);
@@ -230,8 +231,22 @@ function App() {
         menuButtonRef.current?.focus();
       }
     };
+    const closeOutsideHeader = (event) => {
+      if (!menuButtonRef.current?.closest("header")?.contains(event.target)) setMenuOpen(false);
+    };
+    const closeOnDesktop = () => {
+      if (window.innerWidth > 980) setMenuOpen(false);
+    };
     window.addEventListener("keydown", closeOnEscape);
-    return () => window.removeEventListener("keydown", closeOnEscape);
+    window.addEventListener("resize", closeOnDesktop);
+    document.addEventListener("pointerdown", closeOutsideHeader);
+    document.addEventListener("focusin", closeOutsideHeader);
+    return () => {
+      window.removeEventListener("keydown", closeOnEscape);
+      window.removeEventListener("resize", closeOnDesktop);
+      document.removeEventListener("pointerdown", closeOutsideHeader);
+      document.removeEventListener("focusin", closeOutsideHeader);
+    };
   }, [menuOpen]);
 
   useEffect(() => {
@@ -244,11 +259,19 @@ function App() {
   const speak = (key) => {
     const audio = audioRef.current;
     if (!audio) return;
+    const request = ++playbackRequestRef.current;
+    if (speakingKey === key && !audio.paused) {
+      audio.pause();
+      setSpeakingKey(null);
+      return;
+    }
     audio.pause();
     audio.currentTime = 0;
     audio.src = audioClips[key];
     setSpeakingKey(key);
-    audio.play().catch(() => setSpeakingKey(null));
+    audio.play().catch(() => {
+      if (playbackRequestRef.current === request) setSpeakingKey(null);
+    });
   };
 
   useEffect(() => {
@@ -381,6 +404,7 @@ function App() {
 
   return (
     <main className="site-shell">
+      <a className="skip-link" href="#top">Skip to content</a>
       <div className="scroll-progress" aria-hidden="true" />
       <audio ref={audioRef} preload="none" hidden aria-hidden="true" onEnded={() => setSpeakingKey(null)} onError={() => setSpeakingKey(null)} />
 
@@ -404,6 +428,7 @@ function App() {
       <section
         className="hero"
         id="top"
+        tabIndex={-1}
         ref={heroRef}
       >
         <div className="hero-pin" onPointerMove={handleHeroPointer} onPointerLeave={resetHeroPointer}>
@@ -536,6 +561,19 @@ function App() {
               <span>{feature.eyebrow}</span>
               <h2>{feature.id === "tutor" ? "An AI Tutor that gets you" : feature.title}</h2>
             </div>
+            {(feature.id === "conversation" || feature.id === "pronunciation") && (
+              <div className="story-mobile-audio" role="group" aria-label="Listen to sample Spanish phrases">
+                {(feature.id === "conversation"
+                  ? [{ key: "travel", label: "Travel plans" }, { key: "cafe", label: "At a café" }]
+                  : [{ key: "practico", label: "Hear “Practico”" }]
+                ).map((clip) => (
+                  <button key={clip.key} type="button" className={speakingKey === clip.key ? "is-playing" : ""} onClick={() => speak(clip.key)} aria-pressed={speakingKey === clip.key}>
+                    <SpeakerHigh weight="duotone" aria-hidden="true" />{clip.label}
+                    {speakingKey === clip.key && <span className="audio-playing-dot" aria-hidden="true" />}
+                  </button>
+                ))}
+              </div>
+            )}
             <img className="story-mobile-phone" src={phoneScreens[feature.id]} alt={`${feature.title} screen in LinguaStar`} loading="lazy" />
             <div className="story-marker-note">
               <span>Inside the app / {feature.eyebrow}</span>
@@ -549,7 +587,7 @@ function App() {
       <section className="avatar-parade" id="tutors" aria-labelledby="tutor-heading">
         <div className="avatar-heading">
           <p className="kicker">Choose your connection</p>
-          <h2 id="tutor-heading">Meet a tutor who<br />speaks your language.</h2>
+          <h2 id="tutor-heading">Meet a tutor who<br className="tutor-heading-break" /> speaks your language.</h2>
           <p><span className="tutor-instructions-desktop">Hover or tap a tutor to meet them.</span><span className="tutor-instructions-mobile">Choose a tutor below to meet them.</span></p>
         </div>
         <div className="avatar-stage" style={{ "--selected-tutor-x": `${Math.max(0, Math.min(100, tutorCropX))}%` }}>
@@ -607,7 +645,7 @@ function App() {
             </div>
             <div className="languages-display-phrase" key={`phrase-${selectedLanguage}`}>
               <span className="languages-display-flag" aria-hidden="true">{languages[selectedLanguage].flag}</span>
-              <strong>{languages[selectedLanguage].phrase}</strong>
+              <strong lang={languages[selectedLanguage].lang}>{languages[selectedLanguage].phrase}</strong>
               <small>{languages[selectedLanguage].pronunciation}</small>
             </div>
             <div className="languages-display-bottom"><Sparkle weight="fill" aria-hidden="true" /> Every conversation starts somewhere.</div>
@@ -634,7 +672,7 @@ function App() {
             >
               <span aria-hidden="true">{language.flag}</span>
               <span>{language.name}</span>
-              <small>{language.native}</small>
+              <small lang={language.lang}>{language.native}</small>
             </button>
           ))}
         </div>
