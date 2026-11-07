@@ -30,18 +30,14 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
-      - name: Set Pages base path
-        run: |
-          repo_name="${GITHUB_REPOSITORY#*/}"
-          if [ "$repo_name" = "${GITHUB_REPOSITORY_OWNER}.github.io" ]; then
-            echo "GITHUB_PAGES_BASE=/" >> "$GITHUB_ENV"
-          else
-            echo "GITHUB_PAGES_BASE=/$repo_name/" >> "$GITHUB_ENV"
-          fi
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
+      # base_path is empty on a custom domain and "/<repo>" on github.io.
       - name: Build
         run: npm run build
-      - name: Configure Pages
-        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
+        env:
+          GITHUB_PAGES_BASE: ${{ steps.pages.outputs.base_path }}/
       - name: Upload site
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
         with:

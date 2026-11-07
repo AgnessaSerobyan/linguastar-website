@@ -60,12 +60,15 @@ const phoneScreens = {
 };
 
 const audioClips = {
-  travel: asset("conversation-travel.wav"),
-  cafe: asset("conversation-cafe.wav"),
-  practico: asset("pronunciation-practico.wav"),
+  travel: asset("conversation-travel.mp3"),
+  cafe: asset("conversation-cafe.mp3"),
+  practico: asset("pronunciation-practico.mp3"),
 };
 
-const appStoreUrl = "https://apps.apple.com/am/app/linguastar-ai-learn-languages/id6746935816";
+// No storefront in the path, so each visitor lands in their own App Store.
+// ct names the placement for App Store Connect campaign analytics.
+const appStoreUrl = (placement) =>
+  `https://apps.apple.com/app/apple-store/id6746935816?pt=127892184&ct=website_global_${placement}&mt=8`;
 const downloadPageUrl = `${import.meta.env.BASE_URL}download.html`;
 
 const storyNotes = {
@@ -80,7 +83,7 @@ const languages = [
   { name: "British English", lang: "en-GB", native: "English", flag: "🇬🇧", word: "HELLO", phrase: "Lovely to meet you!", pronunciation: "Make yourself at home." },
   { name: "German", lang: "de", native: "Deutsch", flag: "🇩🇪", word: "HALLO", phrase: "Hallo, wie geht’s?", pronunciation: "Hello, how are you?" },
   { name: "Spanish", lang: "es", native: "Español", flag: "🇪🇸", word: "HOLA", phrase: "¡Hola! ¿Qué tal?", pronunciation: "Hi! How’s it going?" },
-  { name: "French", lang: "fr", native: "Français", flag: "🇫🇷", word: "BONJOUR", phrase: "Bonjour, enchanté !", pronunciation: "Hello, nice to meet you!" },
+  { name: "French", lang: "fr", native: "Français", flag: "🇫🇷", word: "BONJOUR", phrase: "Bonjour, enchanté\u00a0!", pronunciation: "Hello, nice to meet you!" },
   { name: "Korean", lang: "ko", native: "한국어", flag: "🇰🇷", word: "안녕", phrase: "안녕하세요!", pronunciation: "Hello!" },
   { name: "Japanese", lang: "ja", native: "日本語", flag: "🇯🇵", word: "こんにちは", phrase: "こんにちは！", pronunciation: "Hello!" },
 ];
@@ -131,7 +134,6 @@ function FeatureCard({ feature, index, onSelect }) {
       className={`feature-card feature-card-${index + 1}`}
       type="button"
       onClick={() => onSelect(feature.id)}
-      aria-label={`Explore ${feature.title}`}
     >
       <span className="feature-icon" aria-hidden="true"><Icon weight="duotone" /></span>
       <span className="feature-eyebrow">{feature.eyebrow}</span>
@@ -150,6 +152,9 @@ function StoryPhone({ active }) {
           key={id}
           className={`story-phone-screen ${active === id ? "is-active" : ""}`}
           src={src}
+          width="570"
+          height="1167"
+          loading="lazy"
           alt={active === id ? `${features.find((feature) => feature.id === id)?.title} screen in LinguaStar` : ""}
           aria-hidden={active !== id}
         />
@@ -191,9 +196,9 @@ function AdaptiveTutorField({ mobile = false }) {
       <span className="ai-language-chip ai-chip-support">Ready when you are</span>
 
       <div className="ai-star-cluster">
-        <img src={asset("star-spark.webp")} alt="" />
-        <img src={asset("star-spark.webp")} alt="" />
-        <img src={asset("star-spark.webp")} alt="" />
+        <img src={asset("star-spark.webp")} width="194" height="179" alt="" />
+        <img src={asset("star-spark.webp")} width="194" height="179" alt="" />
+        <img src={asset("star-spark.webp")} width="194" height="179" alt="" />
       </div>
 
       <div className="ai-editorial-mantra">
@@ -398,19 +403,19 @@ function App() {
   const tutorFrameRatio = 3 / 4;
   const tutorCropX = ((Number.parseFloat(tutor.x) / 100) * tutorImageRatio - tutorFrameRatio / 2) / (tutorImageRatio - tutorFrameRatio) * 100;
   const activeStoryNumber = String(features.findIndex((feature) => feature.id === activeStory) + 1).padStart(2, "0");
-  const downloadProps = desktopDownload
+  const downloadProps = (placement) => (desktopDownload
     ? { href: downloadPageUrl }
-    : { href: appStoreUrl, target: "_blank", rel: "noreferrer" };
+    : { href: appStoreUrl(placement), target: "_blank", rel: "noreferrer" });
 
   return (
-    <main className="site-shell">
+    <div className="site-shell">
       <a className="skip-link" href="#top">Skip to content</a>
       <div className="scroll-progress" aria-hidden="true" />
       <audio ref={audioRef} preload="none" hidden aria-hidden="true" onEnded={() => setSpeakingKey(null)} onError={() => setSpeakingKey(null)} />
 
       <header className={`site-header ${headerScrolled ? "is-scrolled" : ""} ${menuOpen ? "is-menu-open" : ""}`}>
         <a href="#top" className="brand" aria-label="LinguaStar home" onClick={() => setMenuOpen(false)}>
-          <img src={asset("linguastar-logo.webp")} alt="LinguaStar" />
+          <img src={asset("linguastar-logo.webp")} width="418" height="106" alt="LinguaStar" />
         </a>
         <button ref={menuButtonRef} type="button" className="menu-toggle" aria-label={menuOpen ? "Close navigation" : "Open navigation"} aria-expanded={menuOpen} aria-controls="primary-navigation" onClick={() => setMenuOpen((open) => !open)}>
           {menuOpen ? <X weight="bold" aria-hidden="true" /> : <List weight="bold" aria-hidden="true" />}
@@ -420,11 +425,12 @@ function App() {
           <a href="#tutors">Tutors</a>
           <a href="#languages">Languages</a>
         </nav>
-        <ActionButton className="header-download" aria-label="Download from App Store" {...downloadProps}>
+        <ActionButton className="header-download" aria-label="Download from App Store" {...downloadProps("header")}>
           <DownloadSimple weight="bold" aria-hidden="true" /><span className="download-label-full">Download from App Store</span><span className="download-label-short">App Store</span>
         </ActionButton>
       </header>
 
+      <main>
       <section
         className="hero"
         id="top"
@@ -447,7 +453,7 @@ function App() {
           <strong>01 / 06</strong>
         </div>
 
-        <img className="hero-phone" src={asset("phone-ai-tutor.webp")} alt="LinguaStar AI conversation on a phone" />
+        <img className="hero-phone" src={asset("phone-ai-tutor.webp")} width="570" height="1167" fetchPriority="high" alt="LinguaStar AI conversation on a phone" />
 
         <div className="hero-bubble hero-bubble-left" aria-hidden="true">
           <span>Hola, ¿qué tal?</span>
@@ -459,13 +465,13 @@ function App() {
           <strong>You’re making stellar progress</strong>
           <div><BookOpen weight="duotone" /><ChatCircleDots weight="duotone" /><Star weight="duotone" /></div>
         </div>
-        <img className="hero-star hero-star-one" src={asset("star-spark.webp")} alt="" />
-        <img className="hero-star hero-star-two" src={asset("star-spark.webp")} alt="" />
+        <img className="hero-star hero-star-one" src={asset("star-spark.webp")} width="194" height="179" alt="" />
+        <img className="hero-star hero-star-two" src={asset("star-spark.webp")} width="194" height="179" alt="" />
         <div className="hero-scroll-cue" aria-hidden="true"><span />Scroll to reveal</div>
         </div>
 
         <div className="hero-actions">
-          <ActionButton magnetic {...downloadProps}>
+          <ActionButton magnetic {...downloadProps("hero")}>
             <DownloadSimple weight="bold" aria-hidden="true" /> Download from App Store
           </ActionButton>
           <button className="watch-story" type="button" onClick={() => goToStory("conversation")}>
@@ -541,7 +547,7 @@ function App() {
           <div className="story-running-index" key={`index-${activeStory}`} aria-hidden="true">
             <strong>{activeStoryNumber}</strong><span>/ 04</span>
           </div>
-          <div className="story-state-indicator" aria-label={`Showing ${features.find((item) => item.id === activeStory)?.title}`}>
+          <div className="story-state-indicator" role="group" aria-label={`Showing ${features.find((item) => item.id === activeStory)?.title}`}>
             {features.map((feature) => (
               <button
                 key={feature.id}
@@ -574,7 +580,7 @@ function App() {
                 ))}
               </div>
             )}
-            <img className="story-mobile-phone" src={phoneScreens[feature.id]} alt={`${feature.title} screen in LinguaStar`} loading="lazy" />
+            <img className="story-mobile-phone" src={phoneScreens[feature.id]} width="570" height="1167" alt={`${feature.title} screen in LinguaStar`} loading="lazy" />
             <div className="story-marker-note">
               <span>Inside the app / {feature.eyebrow}</span>
               <p>{storyNotes[feature.id].map((line) => <span key={line}>{line}</span>)}</p>
@@ -591,7 +597,7 @@ function App() {
           <p><span className="tutor-instructions-desktop">Hover or tap a tutor to meet them.</span><span className="tutor-instructions-mobile">Choose a tutor below to meet them.</span></p>
         </div>
         <div className="avatar-stage" style={{ "--selected-tutor-x": `${Math.max(0, Math.min(100, tutorCropX))}%` }}>
-          <img src={asset("tutor-parade.png")} alt="A diverse group of friendly LinguaStar AI tutors" loading="lazy" decoding="async" />
+          <img src={asset("tutor-parade.webp")} width="1600" height="700" alt="A diverse group of friendly LinguaStar AI tutors" loading="lazy" decoding="async" />
           {tutors.map((item, index) => (
             <button
               key={item.name}
@@ -659,7 +665,7 @@ function App() {
           </div>
           <div className={`languages-timer ${languageAutoPlay && languagesInView ? "is-running" : ""}`} key={`timer-${selectedLanguage}`} aria-hidden="true"><span /></div>
         </div>
-        <div className="language-list" aria-label="Languages you can learn">
+        <div className="language-list" role="group" aria-label="Languages you can learn">
           {languages.map((language, index) => (
             <button
               key={language.name}
@@ -668,7 +674,6 @@ function App() {
               style={{ "--language-index": index }}
               onClick={() => { setSelectedLanguage(index); setLanguageAutoPlay(false); }}
               aria-pressed={selectedLanguage === index}
-              aria-label={`Preview ${language.name}`}
             >
               <span aria-hidden="true">{language.flag}</span>
               <span>{language.name}</span>
@@ -680,24 +685,25 @@ function App() {
       </section>
 
       <section className="final-cta" aria-labelledby="cta-heading">
-        <img src={asset("app-icon.webp")} alt="" className="cta-icon" />
+        <img src={asset("app-icon.webp")} width="400" height="400" alt="" className="cta-icon" />
         <p className="kicker">Stop memorizing. Start speaking.</p>
         <h2 id="cta-heading">Start speaking<br />confidently.</h2>
         <p>Every conversation brings you closer to fluency.</p>
-        <ActionButton magnetic {...downloadProps}>
+        <ActionButton magnetic {...downloadProps("footer_cta")}>
           <DownloadSimple weight="bold" aria-hidden="true" /> Download from App Store
         </ActionButton>
       </section>
+      </main>
 
       <footer>
-        <img src={asset("linguastar-logo.webp")} alt="LinguaStar" />
+        <img src={asset("linguastar-logo.webp")} width="418" height="106" alt="LinguaStar" />
         <p>Discover a new way to master speaking confidently.</p>
         <div>
           <a href={`${import.meta.env.BASE_URL}privacy-policy.html`}>Privacy Policy</a>
           <a href={`${import.meta.env.BASE_URL}terms-and-conditions.html`}>Terms &amp; Conditions</a>
         </div>
       </footer>
-    </main>
+    </div>
   );
 }
 
