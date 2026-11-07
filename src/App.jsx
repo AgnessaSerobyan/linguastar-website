@@ -171,14 +171,14 @@ function AdaptiveTutorField({ mobile = false }) {
     <div className={`adaptive-tutor-field ${mobile ? "is-mobile" : ""}`} aria-hidden="true">
       <div className="ai-signal-core">
         <Waveform weight="duotone" />
-        <span>Live response</span>
+        <span>Voice replies</span>
       </div>
 
       <div className="ai-adaptive-card ai-card-listen">
         <span className="ai-card-icon"><Microphone weight="duotone" /></span>
-        <small>Listening for</small>
-        <strong>Your pace + confidence</strong>
-        <em>Signal understood</em>
+        <small>Listening to</small>
+        <strong>Your voice, in any language</strong>
+        <em>Translated when you need it</em>
       </div>
 
       <div className="ai-adaptive-card ai-card-reply">
@@ -537,7 +537,7 @@ function App() {
             <div className="story-label story-label-left">
               <span>04</span>
               <h2>An AI Tutor<br />that gets you</h2>
-              <p>It listens for how you learn, then reshapes the conversation around you.</p>
+              <p>It listens to what you say, then adapts its words, grammar and pace to your level.</p>
             </div>
             <AdaptiveTutorField />
           </div>
