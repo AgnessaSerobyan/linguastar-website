@@ -25,3 +25,9 @@ h1 { margin: 0 0 22px; font-size: clamp(52px, 9vw, 100px); font-weight: 600; let
 @media (max-width: 380px) { h1 { font-size: 44px; } .legal-header { gap: 14px; padding-inline: 18px; } .legal-header img { max-width: 42vw; } .legal-header a:last-child { font-size: 11px; white-space: nowrap; } .legal-main { padding-inline: 18px; } .legal-content section, .legal-note { padding: 20px; } }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 .legal-header > a, .legal-footer a { display: inline-flex; min-height: 44px; align-items: center; }
+/* Approved legal texts: subsections, lists and multi-paragraph sections. */
+.legal-content p + p, .legal-content p + ul, .legal-content ul + p { margin-top: 12px; }
+.legal-content h3 { margin: 18px 0 8px; font-size: 17px; letter-spacing: -.02em; }
+.legal-content ul { margin: 8px 0 0; padding-left: 22px; color: #58617b; font-size: 15px; line-height: 1.75; }
+.legal-content ul ul { margin: 2px 0 4px; }
+.legal-content li + li { margin-top: 4px; }

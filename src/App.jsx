@@ -88,12 +88,15 @@ const languages = [
   { name: "Japanese", lang: "ja", native: "日本語", flag: "🇯🇵", word: "こんにちは", phrase: "こんにちは！", pronunciation: "Hello!" },
 ];
 
+// Real LinguaStar tutors (one native tutor per study language), positioned on tutor-lineup.webp.
 const tutors = [
-  { name: "Leo", language: "English", personality: "Encouraging & clear", x: "32%", y: "43%" },
-  { name: "Yuna", language: "Korean", personality: "Patient & thoughtful", x: "22%", y: "52%" },
-  { name: "Sofia", language: "Spanish", personality: "Playful, lively, warm", x: "50%", y: "40%" },
-  { name: "Maya", language: "French", personality: "Curious & expressive", x: "68%", y: "48%" },
-  { name: "Hana", language: "Japanese", personality: "Calm & precise", x: "79%", y: "55%" },
+  { name: "Elizabeth", language: "British English", personality: "Elegant, warm, refined", x: "17%", y: "50%" },
+  { name: "John", language: "American English", personality: "Relaxed, friendly, approachable", x: "28%", y: "50%" },
+  { name: "Helga", language: "German", personality: "Professional, focused, disciplined", x: "39%", y: "50%" },
+  { name: "María", language: "Spanish", personality: "Playful, lively, warm", x: "50%", y: "50%" },
+  { name: "Sophie", language: "French", personality: "Gentle, romantic, expressive", x: "61%", y: "50%" },
+  { name: "Minho", language: "Korean", personality: "Charismatic, energetic, stylish", x: "72%", y: "50%" },
+  { name: "Miko", language: "Japanese", personality: "Calm, graceful, caring", x: "83%", y: "50%" },
 ];
 
 function ActionButton({ className = "", children, magnetic = false, ...props }) {
@@ -216,7 +219,7 @@ function App() {
   const playbackRequestRef = useRef(0);
   const menuButtonRef = useRef(null);
   const [activeStory, setActiveStory] = useState("conversation");
-  const [selectedTutor, setSelectedTutor] = useState(2);
+  const [selectedTutor, setSelectedTutor] = useState(3);
   const [speakingKey, setSpeakingKey] = useState(null);
   const [selectedLanguage, setSelectedLanguage] = useState(3);
   const [headerScrolled, setHeaderScrolled] = useState(false);
@@ -597,7 +600,7 @@ function App() {
           <p><span className="tutor-instructions-desktop">Hover or tap a tutor to meet them.</span><span className="tutor-instructions-mobile">Choose a tutor below to meet them.</span></p>
         </div>
         <div className="avatar-stage" style={{ "--selected-tutor-x": `${Math.max(0, Math.min(100, tutorCropX))}%` }}>
-          <img src={asset("tutor-parade.webp")} width="1600" height="700" alt="A diverse group of friendly LinguaStar AI tutors" loading="lazy" decoding="async" />
+          <img src={asset("tutor-lineup.webp")} width="1600" height="700" alt="LinguaStar AI tutors Elizabeth, John, Helga, María, Sophie, Minho and Miko" loading="lazy" decoding="async" />
           {tutors.map((item, index) => (
             <button
               key={item.name}
@@ -629,7 +632,7 @@ function App() {
           ))}
         </div>
         <div className="tutor-marquee" aria-hidden="true">
-          LEO · YUNA · SOFIA · MAYA · HANA · LEO · YUNA · SOFIA · MAYA · HANA
+          ELIZABETH · JOHN · HELGA · MARÍA · SOPHIE · MINHO · MIKO
         </div>
       </section>
 
