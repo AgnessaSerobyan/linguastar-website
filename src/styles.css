@@ -3719,3 +3719,11 @@ body { min-width: 0; }
 @media (min-width: 681px) and (max-width: 980px) and (max-height: 740px) {
   .story-mini-note-pronunciation { top: 40vh; }
 }
+
+/* "Cookie settings" reopens the analytics choice; styled like the footer links. */
+footer .footer-link { padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; }
+footer .footer-link:hover { color: var(--blue-deep); }
+
+@media (max-width: 540px) {
+  footer .footer-link { display: inline-flex; min-height: 44px; align-items: center; }
+}

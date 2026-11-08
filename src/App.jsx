@@ -707,6 +707,9 @@ function App() {
         <div>
           <a href={`${import.meta.env.BASE_URL}privacy-policy.html`}>Privacy Policy</a>
           <a href={`${import.meta.env.BASE_URL}terms-and-conditions.html`}>Terms &amp; Conditions</a>
+          {window.linguastarAnalytics && (
+            <button type="button" className="footer-link" onClick={() => window.linguastarAnalytics.openSettings()}>Cookie settings</button>
+          )}
         </div>
       </footer>
     </div>
