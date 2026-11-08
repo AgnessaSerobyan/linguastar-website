@@ -149,7 +149,7 @@ function FeatureCard({ feature, index, onSelect }) {
 
 function StoryPhone({ active }) {
   return (
-    <div className={`story-phone story-phone-${active}`} aria-live="polite">
+    <div className={`story-phone story-phone-${active}`}>
       {Object.entries(phoneScreens).map(([id, src]) => (
         <img
           key={id}
@@ -500,40 +500,40 @@ function App() {
 
       <section className="story" aria-label="LinguaStar product story">
         <div className="story-sticky" data-active-story={activeStory}>
-          <div className="story-scene story-scene-conversation" aria-hidden={activeStory !== "conversation"}>
+          <div className="story-scene story-scene-conversation">
             <div className="story-label story-label-left">
               <span>01</span>
               <h2>Real-Life<br />Conversations</h2>
               <p>Practice speaking freely, ask anything, and improve at your own pace.</p>
             </div>
-            <button className={`dialogue dialogue-left sound-trigger ${speakingKey === "weekend" ? "is-playing" : ""}`} type="button" onClick={() => speak("weekend")} disabled={activeStory !== "conversation"} aria-label="Hear the weekend plans phrase in Spanish"><small>Weekend plans <SpeakerHigh weight="duotone" /></small><span lang="es">¿Qué planes tienes para el fin de semana?</span><span className="dialogue-translation">What are your plans for the weekend?</span></button>
-            <button className={`dialogue dialogue-right sound-trigger ${speakingKey === "cafe" ? "is-playing" : ""}`} type="button" onClick={() => speak("cafe")} disabled={activeStory !== "conversation"} aria-label="Hear the café phrase in Spanish"><small>At a café <SpeakerHigh weight="duotone" /></small><span lang="es">Me gustaría un café con leche, por favor.</span><span className="dialogue-translation">I’d like a coffee with milk, please.</span></button>
+            <button className={`dialogue dialogue-left sound-trigger ${speakingKey === "weekend" ? "is-playing" : ""}`} type="button" onClick={() => speak("weekend")} disabled={activeStory !== "conversation"} aria-hidden={activeStory !== "conversation"}><small><span className="visually-hidden">Play: </span>Weekend plans <SpeakerHigh weight="duotone" aria-hidden="true" /></small><span lang="es">¿Qué planes tienes para el fin de semana?</span><span className="dialogue-translation">What are your plans for the weekend?</span></button>
+            <button className={`dialogue dialogue-right sound-trigger ${speakingKey === "cafe" ? "is-playing" : ""}`} type="button" onClick={() => speak("cafe")} disabled={activeStory !== "conversation"} aria-hidden={activeStory !== "conversation"}><small><span className="visually-hidden">Play: </span>At a café <SpeakerHigh weight="duotone" aria-hidden="true" /></small><span lang="es">Me gustaría un café con leche, por favor.</span><span className="dialogue-translation">I’d like a coffee with milk, please.</span></button>
           </div>
 
-          <div className="story-scene story-scene-pronunciation" aria-hidden={activeStory !== "pronunciation"}>
+          <div className="story-scene story-scene-pronunciation">
             <div className="story-label story-label-left">
               <span>02</span>
               <h2>Pronunciation<br />that feels natural</h2>
               <p>See, hear, and fix each sound with clear feedback.</p>
             </div>
             <div className="pronunciation-word" aria-hidden="true">CONFIDENTLY</div>
-            <div className="pronunciation-score"><strong>90%</strong><span>Great clarity</span></div>
-            <button className={`sound-tip sound-trigger ${speakingKey === "practico" ? "is-playing" : ""}`} type="button" onClick={() => speak("practico")} disabled={activeStory !== "pronunciation"} aria-label="Hear Practico pronounced in Spanish"><SpeakerHigh weight="duotone" /><span>Practico</span><small>/pɾakˈtiko/</small></button>
+            <div className="pronunciation-score" aria-hidden="true"><strong>90%</strong><span>Great clarity</span></div>
+            <button className={`sound-tip sound-trigger ${speakingKey === "practico" ? "is-playing" : ""}`} type="button" onClick={() => speak("practico")} disabled={activeStory !== "pronunciation"} aria-hidden={activeStory !== "pronunciation"}><SpeakerHigh weight="duotone" aria-hidden="true" /><span><span className="visually-hidden">Play: </span><span lang="es">Practico</span></span><small aria-hidden="true">/pɾakˈtiko/</small></button>
           </div>
 
-          <div className="story-scene story-scene-progress" aria-hidden={activeStory !== "progress"}>
+          <div className="story-scene story-scene-progress">
             <div className="story-label story-label-left">
               <span>03</span>
               <h2>Progress<br />that motivates</h2>
               <p>Lessons guide you forward, one meaningful step at a time.</p>
             </div>
-            <div className="milestone milestone-a1">A1 <Check weight="bold" /></div>
-            <div className="milestone milestone-a2">A2 <Check weight="bold" /></div>
-            <div className="milestone milestone-b1">B1 <Star weight="fill" /></div>
-            <div className="milestone milestone-b2">B2 <span>Next</span></div>
+            <div className="milestone milestone-a1" aria-hidden="true">A1 <Check weight="bold" /></div>
+            <div className="milestone milestone-a2" aria-hidden="true">A2 <Check weight="bold" /></div>
+            <div className="milestone milestone-b1" aria-hidden="true">B1 <Star weight="fill" /></div>
+            <div className="milestone milestone-b2" aria-hidden="true">B2 <span>Next</span></div>
           </div>
 
-          <div className="story-scene story-scene-tutor" aria-hidden={activeStory !== "tutor"}>
+          <div className="story-scene story-scene-tutor">
             <div className="story-label story-label-left">
               <span>04</span>
               <h2>An AI Tutor<br />that gets you</h2>

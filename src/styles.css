@@ -5,9 +5,9 @@
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   --ink: #10182f;
-  --muted: #58617b;
-  --blue: #5275d7;
-  --blue-deep: #3f61c5;
+  --muted: #4f576e;
+  --blue: #4b6fd5;
+  --blue-deep: #3351aa;
   --lavender: #d9d6f7;
   --lavender-deep: #aeb9ed;
   --cream: #fffaf4;
@@ -290,7 +290,7 @@ footer img {
 }
 
 .hero-bubble small {
-  color: #68718f;
+  color: var(--muted);
   font-size: 13px;
   line-height: 1.45;
 }
@@ -685,7 +685,7 @@ footer img {
 }
 
 .dialogue small {
-  color: #7e86a0;
+  color: var(--muted);
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.1em;
@@ -787,7 +787,7 @@ footer img {
 .milestone-a1 { top: 25%; left: 28%; }
 .milestone-a2 { top: 39%; left: 23%; }
 .milestone-b1 { top: 31%; right: 19%; color: var(--blue-deep); }
-.milestone-b2 { bottom: 26%; right: 12%; opacity: 0.72; }
+.milestone-b2 { bottom: 26%; right: 12%; }
 .milestone-b2 span { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; }
 
 .tutor-teaser {
@@ -1670,7 +1670,7 @@ footer a:hover {
 }
 
 .transition-intro h2 span:nth-child(2) { margin-left: 17vw; }
-.transition-intro h2 span:nth-child(3) { margin-left: 4vw; color: rgba(16, 24, 47, 0.26); }
+.transition-intro h2 span:nth-child(3) { margin-left: 4vw; color: rgba(16, 24, 47, 0.52); }
 
 .feature-counter {
   position: absolute;
@@ -2029,7 +2029,7 @@ footer a:hover {
 }
 
 .ai-adaptive-card em {
-  color: #7d85a0;
+  color: var(--muted);
   font-size: 10px;
   font-style: normal;
   font-weight: 660;
@@ -2826,7 +2826,7 @@ footer a:hover {
 .language-pill > span:first-child { font-size: 25px; line-height: 1; }
 .language-pill > span:nth-child(2) { font-size: 15px; font-weight: 760; white-space: nowrap; }
 .language-pill small { color: var(--muted); font-size: 11px; }
-.language-pill.is-active small { color: rgba(255, 255, 255, 0.78); }
+.language-pill.is-active small { color: #fff; }
 
 .languages-watermark {
   position: absolute;
@@ -3058,7 +3058,7 @@ footer a:hover {
 }
 
 .languages-display-count {
-  color: rgba(63, 97, 197, 0.62);
+  color: var(--blue-deep);
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.1em;
@@ -3608,4 +3608,17 @@ body { min-width: 0; }
   content: "";
   transform: scaleX(var(--feature-progress, 0));
   transform-origin: left center;
+}
+
+/* Text only screen readers hear, such as what a sound button does. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
