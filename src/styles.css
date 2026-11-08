@@ -1628,10 +1628,6 @@ footer a:hover {
   transform: rotate(180deg);
 }
 
-.hero-editorial-rail strong {
-  color: var(--blue-deep);
-  font-size: 12px;
-}
 
 .feature-transition {
   --feature-title-x: 0px;
@@ -3598,4 +3594,18 @@ body { min-width: 0; }
 /* Small laptops: the phone sits closer, so the headings step down a little. */
 @media (min-width: 981px) and (max-width: 1180px) {
   .story-label h2 { font-size: 5.8vw; }
+}
+
+/* Spanish sample phrases show their English meaning under the phrase. */
+.dialogue-translation { color: var(--muted); font-size: 12px; line-height: 1.4; }
+
+/* The 01—04 line fills as the four cards fan out, so it reads as real progress. */
+.feature-counter i { position: relative; height: 2px; overflow: hidden; }
+.feature-counter i::after {
+  position: absolute;
+  inset: 0;
+  background: var(--blue-deep);
+  content: "";
+  transform: scaleX(var(--feature-progress, 0));
+  transform-origin: left center;
 }

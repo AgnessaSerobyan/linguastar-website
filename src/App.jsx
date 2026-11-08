@@ -60,7 +60,7 @@ const phoneScreens = {
 };
 
 const audioClips = {
-  travel: asset("conversation-travel.mp3"),
+  weekend: asset("conversation-weekend.mp3"),
   cafe: asset("conversation-cafe.mp3"),
   practico: asset("pronunciation-practico.mp3"),
 };
@@ -79,13 +79,13 @@ const storyNotes = {
 };
 
 const languages = [
-  { name: "American English", lang: "en-US", native: "English", flag: "🇺🇸", word: "HELLO", phrase: "Hello, how are you?", pronunciation: "A fresh start sounds good." },
-  { name: "British English", lang: "en-GB", native: "English", flag: "🇬🇧", word: "HELLO", phrase: "Lovely to meet you!", pronunciation: "Make yourself at home." },
-  { name: "German", lang: "de", native: "Deutsch", flag: "🇩🇪", word: "HALLO", phrase: "Hallo, wie geht’s?", pronunciation: "Hello, how are you?" },
-  { name: "Spanish", lang: "es", native: "Español", flag: "🇪🇸", word: "HOLA", phrase: "¡Hola! ¿Qué tal?", pronunciation: "Hi! How’s it going?" },
-  { name: "French", lang: "fr", native: "Français", flag: "🇫🇷", word: "BONJOUR", phrase: "Bonjour, enchanté\u00a0!", pronunciation: "Hello, nice to meet you!" },
-  { name: "Korean", lang: "ko", native: "한국어", flag: "🇰🇷", word: "안녕", phrase: "안녕하세요!", pronunciation: "Hello!" },
-  { name: "Japanese", lang: "ja", native: "日本語", flag: "🇯🇵", word: "こんにちは", phrase: "こんにちは！", pronunciation: "Hello!" },
+  { name: "American English", lang: "en-US", native: "English", flag: "🇺🇸", word: "HELLO", phrase: "Hey! How’s it going?", gloss: "A casual American greeting" },
+  { name: "British English", lang: "en-GB", native: "English", flag: "🇬🇧", word: "HELLO", phrase: "Lovely to meet you!", gloss: "A warm British greeting" },
+  { name: "German", lang: "de", native: "Deutsch", flag: "🇩🇪", word: "HALLO", phrase: "Hallo, wie geht’s?", gloss: "Hello, how are you?" },
+  { name: "Spanish", lang: "es", native: "Español", flag: "🇪🇸", word: "HOLA", phrase: "¡Hola! ¿Qué tal?", gloss: "Hi! How’s it going?" },
+  { name: "French", lang: "fr", native: "Français", flag: "🇫🇷", word: "BONJOUR", phrase: "Bonjour, enchanté\u00a0!", gloss: "Hello, nice to meet you!" },
+  { name: "Korean", lang: "ko", native: "한국어", flag: "🇰🇷", word: "안녕", phrase: "안녕하세요!", gloss: "Hello!" },
+  { name: "Japanese", lang: "ja", native: "日本語", flag: "🇯🇵", word: "こんにちは", phrase: "こんにちは！", gloss: "Hello!" },
 ];
 
 // Real LinguaStar tutors (one native tutor per study language), positioned on tutor-lineup.webp.
@@ -323,6 +323,7 @@ function App() {
         const progress = clamp(-rect.top / Math.max(rect.height - window.innerHeight, 1));
         featureSection.style.setProperty("--feature-title-x", `${progress * -9}vw`);
         featureSection.style.setProperty("--feature-title-y", `${progress * -12}vh`);
+        featureSection.style.setProperty("--feature-progress", progress.toFixed(3));
         const paths = [
           [-59, -30, -3],
           [-42, -25, -1],
@@ -453,14 +454,13 @@ function App() {
 
         <div className="hero-editorial-rail" aria-hidden="true">
           <span>LinguaStar · Speaking practice reimagined</span>
-          <strong>01 / 06</strong>
         </div>
 
         <img className="hero-phone" src={asset("phone-ai-tutor.webp")} width="570" height="1167" fetchPriority="high" alt="LinguaStar AI conversation on a phone" />
 
         <div className="hero-bubble hero-bubble-left" aria-hidden="true">
           <span>Hola, ¿qué tal?</span>
-          <small>What would you like to talk about today?</small>
+          <small>Hi, how are you?</small>
         </div>
         <div className="hero-score" aria-hidden="true"><strong>90%</strong><Waveform weight="bold" /></div>
         <div className="hero-progress-card" aria-hidden="true">
@@ -506,8 +506,8 @@ function App() {
               <h2>Real-Life<br />Conversations</h2>
               <p>Practice speaking freely, ask anything, and improve at your own pace.</p>
             </div>
-            <button className={`dialogue dialogue-left sound-trigger ${speakingKey === "travel" ? "is-playing" : ""}`} type="button" onClick={() => speak("travel")} disabled={activeStory !== "conversation"} aria-label="Hear the travel plans phrase in Spanish"><small>Travel plans <SpeakerHigh weight="duotone" /></small>¿Qué planes tienes para el fin de semana?</button>
-            <button className={`dialogue dialogue-right sound-trigger ${speakingKey === "cafe" ? "is-playing" : ""}`} type="button" onClick={() => speak("cafe")} disabled={activeStory !== "conversation"} aria-label="Hear the café phrase in Spanish"><small>At a café <SpeakerHigh weight="duotone" /></small>Me gustaría un café con leche, por favor.</button>
+            <button className={`dialogue dialogue-left sound-trigger ${speakingKey === "weekend" ? "is-playing" : ""}`} type="button" onClick={() => speak("weekend")} disabled={activeStory !== "conversation"} aria-label="Hear the weekend plans phrase in Spanish"><small>Weekend plans <SpeakerHigh weight="duotone" /></small><span lang="es">¿Qué planes tienes para el fin de semana?</span><span className="dialogue-translation">What are your plans for the weekend?</span></button>
+            <button className={`dialogue dialogue-right sound-trigger ${speakingKey === "cafe" ? "is-playing" : ""}`} type="button" onClick={() => speak("cafe")} disabled={activeStory !== "conversation"} aria-label="Hear the café phrase in Spanish"><small>At a café <SpeakerHigh weight="duotone" /></small><span lang="es">Me gustaría un café con leche, por favor.</span><span className="dialogue-translation">I’d like a coffee with milk, please.</span></button>
           </div>
 
           <div className="story-scene story-scene-pronunciation" aria-hidden={activeStory !== "pronunciation"}>
@@ -573,7 +573,7 @@ function App() {
             {(feature.id === "conversation" || feature.id === "pronunciation") && (
               <div className="story-mobile-audio" role="group" aria-label="Listen to sample Spanish phrases">
                 {(feature.id === "conversation"
-                  ? [{ key: "travel", label: "Travel plans" }, { key: "cafe", label: "At a café" }]
+                  ? [{ key: "weekend", label: "Weekend plans" }, { key: "cafe", label: "At a café" }]
                   : [{ key: "practico", label: "Hear “Practico”" }]
                 ).map((clip) => (
                   <button key={clip.key} type="button" className={speakingKey === clip.key ? "is-playing" : ""} onClick={() => speak(clip.key)} aria-pressed={speakingKey === clip.key}>
@@ -655,7 +655,7 @@ function App() {
             <div className="languages-display-phrase" key={`phrase-${selectedLanguage}`}>
               <span className="languages-display-flag" aria-hidden="true">{languages[selectedLanguage].flag}</span>
               <strong lang={languages[selectedLanguage].lang}>{languages[selectedLanguage].phrase}</strong>
-              <small>{languages[selectedLanguage].pronunciation}</small>
+              <small>{languages[selectedLanguage].gloss}</small>
             </div>
             <div className="languages-display-bottom"><Sparkle weight="fill" aria-hidden="true" /> Every conversation starts somewhere.</div>
           </div>
