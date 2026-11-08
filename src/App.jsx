@@ -332,8 +332,11 @@ function App() {
         ];
         const tablet = window.matchMedia("(min-width: 681px) and (max-width: 980px)").matches;
         const tabletPaths = [[-67, -32, 6], [-23, -30, 7], [-63, -2, -7], [-19, 0, -6]];
+        // Small laptops: cards 21vw apart so none covers its neighbour's text.
+        const compact = window.matchMedia("(min-width: 981px) and (max-width: 1180px)").matches;
+        const compactPaths = [[-63, -30, -3], [-42, -25, -1], [-21, -20, 2], [0, -15, 4]];
         featureSection.querySelectorAll(".feature-card").forEach((card, index) => {
-          const [x, y, turn] = (tablet ? tabletPaths : paths)[index];
+          const [x, y, turn] = (tablet ? tabletPaths : compact ? compactPaths : paths)[index];
           card.style.setProperty("--card-x", `${progress * x}vw`);
           card.style.setProperty("--card-y", `${progress * y}vh`);
           card.style.setProperty("--card-turn", `${progress * turn}deg`);
@@ -599,7 +602,7 @@ function App() {
           <h2 id="tutor-heading">Meet a tutor who<br className="tutor-heading-break" /> speaks your language.</h2>
           <p><span className="tutor-instructions-desktop">Hover or tap a tutor to meet them.</span><span className="tutor-instructions-mobile">Choose a tutor below to meet them.</span></p>
         </div>
-        <div className="avatar-stage" style={{ "--selected-tutor-x": `${Math.max(0, Math.min(100, tutorCropX))}%` }}>
+        <div className="avatar-stage" style={{ "--selected-tutor-x": `${Math.max(0, Math.min(100, tutorCropX))}%`, "--spot-x": tutor.x }}>
           <img src={asset("tutor-lineup.webp")} width="1600" height="700" alt="LinguaStar AI tutors Elizabeth, John, Helga, María, Sophie, Minho and Miko" loading="lazy" decoding="async" />
           {tutors.map((item, index) => (
             <button
