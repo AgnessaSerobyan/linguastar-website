@@ -58,7 +58,7 @@
     banner.className = "ls-consent";
     banner.setAttribute("aria-label", "Cookie choice");
     banner.innerHTML = `
-      <p><strong>Analytics cookies</strong>We’d like to use Google Analytics cookies to see how visitors use this site and which links lead to the App Store. See our <a href="${base}privacy-policy.html">Privacy Policy</a>.</p>
+      <p><strong>Analytics cookies</strong>We’d like to use Google Analytics cookies to understand how visitors use this site. See our <a href="${base}privacy-policy.html">Privacy Policy</a>.</p>
       <div><button type="button" data-choice="denied">Decline</button><button type="button" data-choice="granted">Accept</button></div>`;
     banner.addEventListener("click", (event) => {
       const choice = event.target.closest("button")?.dataset.choice;
