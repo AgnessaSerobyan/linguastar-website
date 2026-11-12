@@ -226,8 +226,11 @@ function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [languagesVisible, setLanguagesVisible] = useState(false);
   const [languagesInView, setLanguagesInView] = useState(false);
-  const [languageAutoPlay, setLanguageAutoPlay] = useState(() => !window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-  const [desktopDownload, setDesktopDownload] = useState(() => window.matchMedia("(min-width: 981px) and (pointer: fine)").matches);
+  // These three start from fixed values because the page is also rendered at
+  // build time, without a browser; the effects below set the real ones.
+  const [languageAutoPlay, setLanguageAutoPlay] = useState(true);
+  const [desktopDownload, setDesktopDownload] = useState(false);
+  const [analyticsAvailable, setAnalyticsAvailable] = useState(false);
 
   useEffect(() => () => audioRef.current?.pause(), []);
 
@@ -260,8 +263,21 @@ function App() {
   useEffect(() => {
     const media = window.matchMedia("(min-width: 981px) and (pointer: fine)");
     const updateDownloadTarget = () => setDesktopDownload(media.matches);
+    updateDownloadTarget();
     media.addEventListener("change", updateDownloadTarget);
     return () => media.removeEventListener("change", updateDownloadTarget);
+  }, []);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) setLanguageAutoPlay(false);
+  }, []);
+
+  useEffect(() => {
+    // analytics.js is a deferred script, so it may run after this component mounts.
+    const check = () => setAnalyticsAvailable(Boolean(window.linguastarAnalytics));
+    check();
+    window.addEventListener("load", check);
+    return () => window.removeEventListener("load", check);
   }, []);
 
   const speak = (key) => {
@@ -707,7 +723,7 @@ function App() {
         <div>
           <a href={`${import.meta.env.BASE_URL}privacy-policy.html`}>Privacy Policy</a>
           <a href={`${import.meta.env.BASE_URL}terms-and-conditions.html`}>Terms &amp; Conditions</a>
-          {window.linguastarAnalytics && (
+          {analyticsAvailable && (
             <button type="button" className="footer-link" onClick={() => window.linguastarAnalytics.openSettings()}>Cookie settings</button>
           )}
         </div>
